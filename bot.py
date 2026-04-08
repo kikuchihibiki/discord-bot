@@ -15,6 +15,7 @@ load_dotenv()
 DISCORD_BOT_TOKEN = os.getenv("DISCORD_BOT_TOKEN")
 SERPAPI_KEY = os.getenv("SERPAPI_KEY")
 GUILD_ID = int(os.getenv("GUILD_ID", "0"))
+YTDLP_COOKIE_FILE = os.getenv("YTDLP_COOKIE_FILE")
 
 if not DISCORD_BOT_TOKEN:
     raise RuntimeError("DISCORD_BOT_TOKEN が未設定です (.env を確認)")
@@ -32,9 +33,14 @@ def fetch_youtube_meta(url: str) -> Dict[str, str]:
     ydl_opts = {
         "quiet": True,
         "skip_download": True,
-        # うるさい警告を抑える（必要なら外してOK）
         "no_warnings": True,
     }
+
+    if YTDLP_COOKIE_FILE and os.path.exists(YTDLP_COOKIE_FILE):
+        ydl_opts["cookiefile"] = YTDLP_COOKIE_FILE
+    else:
+        print("[yt-dlp] cookie file not found or not set")
+
     with YoutubeDL(ydl_opts) as ydl:
         info = ydl.extract_info(url, download=False)
 
